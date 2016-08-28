@@ -1,6 +1,5 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-# ref: https://github.com/RyanAmos/rethinkdb-vagrant/commit/d34bf5bc0f12190ee85785796f3b88fa9cc3166f
 
 # Ensure a minimum Vagrant version to prevent potential issues.
 Vagrant.require_version '>= 1.5.0'
@@ -13,7 +12,9 @@ Vagrant.configure(2) do |config|
 
   # Providers
   config.vm.provider :virtualbox do |p|
-    p.customize ['modifyvm', :id, '--memory', '512', '--ioapic', 'on']
+    p.customize ['modifyvm', :id,
+                 '--memory', '1024',
+                 '--ioapic', 'on']
   end
 
   # SSH
@@ -21,31 +22,13 @@ Vagrant.configure(2) do |config|
 
   config.vm.define "api" do |api|
     # Port Forwarding
-    config.vm.network :forwarded_port, guest: 3000,  host: 3000
+    # plant-api
+    config.vm.network :forwarded_port, guest: 3000, host: 3000
+    # mongo-express
+    config.vm.network :forwarded_port, guest: 3001, host: 3001
 
     # Provisioning
-    config.vm.provision :shell do |sh|
-      sh.inline = <<-EOF
-        export DEBIAN_FRONTEND=noninteractive;
-
-        # Install Node.js
-        # ref: https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions
-        curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-        apt-get install -y nodejs
-
-        # Install RethinkDB
-        # ref: http://www.rethinkdb.com/docs/install/ubuntu/
-        source /etc/lsb-release && echo "deb http://download.rethinkdb.com/apt $DISTRIB_CODENAME main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list
-        wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -
-        apt-get update
-        apt-get install rethinkdb
-
-        # Install JS drivers for RethinkDB
-        # ref: http://www.rethinkdb.com/docs/install-drivers/javascript/
-        npm install rethinkdb
-
-      EOF
-    end
+    config.vm.provision :shell, path: "provision.sh"
   end
 
   #config.vm.define "app" do |app|
