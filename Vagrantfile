@@ -13,7 +13,7 @@ Vagrant.configure(2) do |config|
   # Providers
   config.vm.provider :virtualbox do |p|
     p.customize ['modifyvm', :id,
-                 '--memory', '1024',
+                 '--memory', '2048',
                  '--ioapic', 'on']
   end
 
